@@ -1,18 +1,50 @@
-<ion-view title="Signup" id="page3">
-  <ion-content padding="true" class="has-header">
-    <form id="signup-form2" class="list">
-      <ion-list id="signup-list2">
-        <label class="item item-input" id="signup-input3">
-          <input type="email" placeholder="Email">
-        </label>
-        <label class="item item-input" id="signup-input5">
-          <input type="text" placeholder="Password">
-        </label>
-        <label class="item item-input" id="signup-input10">
-          <input type="password" placeholder="Confirm Password">
-        </label>
-      </ion-list>
-      <a ui-sref="chooseOrganization" id="signup-button5" class="button button-balanced  button-block">Choose Organization</a>
-    </form>
+<ion-view title="Signup" id="page7" style="background-color:default;">
+  <ion-nav-bar class="bar-balanced">
+    <ion-nav-back-button></ion-nav-back-button>
+  </ion-nav-bar>
+  <ion-content  class="has-header">
+
+
+        <form id="signup-form3" class="list" name='signup' novalidate>
+          <div class="list">
+
+
+            <label class="item item-input" id="signup-input7">
+              <input type="email" name="email" placeholder="Email" ng-model="email" ng-required='true'>
+            </label>
+
+
+            <label class="item item-input" id="signup-input8">
+              <input type="password" id='pw1' name="pw1" placeholder="Password"
+              ng-model="pw1" ng-minlength="6" ng-required/>
+            </label>
+
+
+
+            <label class="item item-input" id="signup-input9">
+              <input type="password"  id="pw2" placeholder="Confirm Password" name="pw2"
+               ng-model="pw2" ng-minlength="6" ng-required pw-check='pw1'/>
+            </label>
+
+            <div class="padding">
+                <p ng-show="signup.email.$invalid && !signup.email.$pristine">* Must be an email address</p>
+                <p ng-show="signup.pw1.$error.required">* Password is required</p>
+                <p ng-show="signup.pw1.$error.minlength">* Password must be longer than 6 characters</p>
+                <span class='msg-error' ng-show='signup.pw2.$error.pwmatch'>
+                  Passwords don't match.
+                </span>
+            </div>
+            <div class="padding">
+                <button type="button" class="button button-block button-balanced" ng-disabled="signup.$invalid" ng-click="submit(email,pw1)">
+                  Choose Your Organization
+                </button>
+            </div>
+
+          </div>
+        </form>
+
+      </div>
+    </div>
+
   </ion-content>
 </ion-view>

@@ -26,6 +26,17 @@ gulp.task('sass', function(done) {
     .on('end', done);
 });
 
+gulp.task('vendors', function() {
+
+  var target = gulp.src('www/index.html');
+  // It's not necessary to read the files (will speed up things), we're only after their paths:
+  var sources = gulp.src(bowerFiles(), {base: "www/lib"});
+
+  return target.pipe(inject(sources, {name: 'bower'}, {read: false}), {relative: false})
+    .pipe(gulp.dest('www'));
+
+});
+
 gulp.task('watch', ['sass'], function() {
   gulp.watch(paths.sass, ['sass']);
 });

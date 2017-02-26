@@ -5,16 +5,26 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('app', ['ionic', 'app.controllers', 'app.routes', 'app.directives','app.services',])
+angular.module('app', ['ionic', 'app.controllers', 'app.routes', 'app.directives','app.services', 'firebase'])
 
 .config(function($ionicConfigProvider, $sceDelegateProvider){
-  
+
 
   $sceDelegateProvider.resourceUrlWhitelist([ 'self','*://www.youtube.com/**', '*://player.vimeo.com/video/**']);
 
 })
 
 .run(function($ionicPlatform) {
+
+  var config = {
+    apiKey: "AIzaSyCFjyRP-LnvLf0NN8JT0nlLPOwvDhhFRGg",
+    authDomain: "pickle-pledge.firebaseapp.com",
+    databaseURL: "https://pickle-pledge.firebaseio.com",
+    storageBucket: "pickle-pledge.appspot.com",
+    messagingSenderId: "1020708669553"
+  };
+  firebase.initializeApp(config);
+
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -35,7 +45,7 @@ angular.module('app', ['ionic', 'app.controllers', 'app.routes', 'app.directives
 */
 .directive('disableSideMenuDrag', ['$ionicSideMenuDelegate', '$rootScope', function($ionicSideMenuDelegate, $rootScope) {
     return {
-        restrict: "A",  
+        restrict: "A",
         controller: ['$scope', '$element', '$attrs', function ($scope, $element, $attrs) {
 
             function stopDrag(){
@@ -70,7 +80,7 @@ angular.module('app', ['ionic', 'app.controllers', 'app.routes', 'app.directives
       attrs.$observe('hrefInappbrowser', function(val){
         href = val;
       });
-      
+
       element.bind('click', function (event) {
 
         window.open(href, '_system', 'location=yes');

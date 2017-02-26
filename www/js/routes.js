@@ -7,47 +7,55 @@ angular.module('app.routes', [])
   // Set up the various states which the app can be in.
   // Each state's controller can be found in controllers.js
   $stateProvider
-    
-  
+
+
 
       .state('welcome', {
-    url: '/page1',
+    url: '/welcome',
     templateUrl: 'templates/welcome.html',
     controller: 'welcomeCtrl'
   })
 
   .state('login', {
-    url: '/page2',
+    url: '/login',
     templateUrl: 'templates/login.html',
     controller: 'loginCtrl'
   })
 
   .state('signup', {
-    url: '/page3',
+    url: '/signup',
     templateUrl: 'templates/signup.html',
     controller: 'signupCtrl'
   })
 
   .state('chooseOrganization', {
-    url: '/page4',
+    url: '/organization',
     templateUrl: 'templates/chooseOrganization.html',
-    controller: 'chooseOrganizationCtrl'
+    controller: 'chooseOrganizationCtrl',
+    params:{
+      email: null
+    }
   })
 
   .state('pickleJar', {
-    url: '/page5',
+    url: '/picklejar',
     templateUrl: 'templates/pickleJar.html',
-    controller: 'pickleJarCtrl'
+    controller: 'pickleJarCtrl',
+    resolve: {
+        "currentAuth": ["Auth", function (Auth) {
+                return Auth.$requireSignIn();
+            }]
+    }
   })
 
   .state('about', {
-    url: '/page6',
+    url: '/about',
     templateUrl: 'templates/about.html',
     controller: 'aboutCtrl'
   })
 
-$urlRouterProvider.otherwise('/page1')
+$urlRouterProvider.otherwise('/welcome')
 
-  
+
 
 });
