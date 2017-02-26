@@ -2,20 +2,29 @@
   <ion-nav-bar class="bar-balanced">
     <ion-nav-back-button></ion-nav-back-button>
   </ion-nav-bar>
-  <ion-content padding="true" class="has-header">
-    <form class="list">
-      <ion-list>
+  <ion-content class="has-header">
+    <form class="list" name='login'>
+      <div class="list">
         <label class="item item-input">
-          <span class="input-label">Email</span>
-          <input type="text" placeholder="">
+          <input type="email" name="email" id="email" placeholder="Email"
+          ng-required='true' ng-model="email" ng-minlength="6">
         </label>
         <label class="item item-input">
-          <span class="input-label">Password</span>
-          <input type="password" placeholder="">
+          <input type="password" placeholder="Password" id='pw' name="pw"
+          ng-required='true' ng-model="pw" ng-minlength="6">
         </label>
-      </ion-list>
-      <div class="spacer" style="height: 40px;"></div>
-      <button class="button button-stable button-block" ui-sref="pickleJar">Log in</button>
+        <div class="padding">
+            <p ng-show="login.email.$invalid && !login.email.$pristine">* Must be a valid email address</p>
+            <p ng-show="login.pw.$error.required && !login.pw.$pristine">* Password is required</p>
+            <p ng-show="login.pw.$error.minlength">* Password must be longer than 6 characters</p>
+        </div>
+        <div class="padding">
+            <button type="button" class="button button-block button-balanced" ng-disabled="login.$invalid" ng-click="submit(email,pw)">
+              Login
+            </button>
+        </div>
+      </div>
+
     </form>
   </ion-content>
 </ion-view>

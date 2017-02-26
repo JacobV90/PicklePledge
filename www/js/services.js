@@ -5,10 +5,6 @@ function ($firebaseAuth) {
     return $firebaseAuth();
 }])
 
-.factory('BlankFactory', [function(){
-
-}])
-
 .service('BlankService', [function(){
 
 }]);
