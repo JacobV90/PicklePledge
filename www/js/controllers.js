@@ -62,12 +62,48 @@ function ($scope, $state, Auth, $ionicLoading) {
 
 }])
 
-.controller('chooseOrganizationCtrl', ['$scope', '$stateParams', // The following is the constructor function for this page's controller. See https://docs.angularjs.org/guide/controller
-// You can include any angular dependencies as parameters for this function
-// TIP: Access Route Parameters for your page via $stateParams.parameterName
-function ($scope, $stateParams) {
+.controller('chooseOrganizationCtrl', ['$scope', '$stateParams', "$firebaseArray", "$state",
+function ($scope, $stateParams, $firebaseArray, $state) {
 
-  console.log($stateParams.email);
+  var orgs_ref = firebase.database().ref("Orgs");
+  var orgs = $firebaseArray(orgs_ref);
+  var selectedOrg;
+
+  $scope.orgs = [];
+
+  orgs.$loaded()
+    .then(function(){
+        angular.forEach(orgs, function(org) {
+            $scope.orgs.push({
+              name: org.$id,
+              checked: false
+            })
+        })
+    });
+
+  $scope.selectOrg = function(name){
+    selectedOrg = name;
+    var index = 0;
+    angular.forEach($scope.orgs, function(org){
+      if(org.name != selectedOrg){
+        $scope.orgs[index].checked = false;
+      }
+      ++index;
+    })
+  }
+
+  $scope.submitOrg = function(){
+    if(selectedOrg){
+      var users = $firebaseArray(orgs_ref.child(selectedOrg+"/Users/"));
+      users.$add({
+        email: $stateParams.email
+      }).then(function(){
+        $state.go('pickleJar')
+      })
+    }else{
+      console.log("org not selected")
+    }
+  }
 
 }])
 

@@ -8,13 +8,14 @@
         <i class="icon ion-search placeholder-icon"></i>
         <input type="search" placeholder="Search ">
       </label>
-      <ion-item id="chooseOrganization-list-item5">Mercy Hospital</ion-item>
-      <ion-item id="chooseOrganization-list-item6">Univeristy of Iowa Hospitals &amp; Clinics</ion-item>
-      <label class="item item-input" id="chooseOrganization-input6">
-        <span class="input-label">St. Lukes Medical Center</span>
-        <input type="text" placeholder="">
-      </label>
-    </ion-list>
-    <button id="chooseOrganization-button9" class="button button-balanced  button-block">Sign Up</button>
+    </ion-list><br>
+    <ion-checkbox class = "noborder"
+                  ng-repeat="org in orgs"
+                  ng-model="org.checked"
+                  ng-checked="org.checked"
+                  ng-change="selectOrg(org.name)">
+          {{ org.name }}
+    </ion-checkbox>
+    <button class="button button-balanced button-block" ng-click="submitOrg()">Sign Up</button>
   </ion-content>
 </ion-view>
