@@ -62,8 +62,8 @@ function ($scope, $state, Auth, $ionicLoading) {
 
 }])
 
-.controller('chooseOrganizationCtrl', ['$scope', '$stateParams', "$firebaseArray", "$state",
-function ($scope, $stateParams, $firebaseArray, $state) {
+.controller('chooseOrganizationCtrl', ['$scope', '$stateParams', "$firebaseArray", "$state", "SearchFilter",
+function ($scope, $stateParams, $firebaseArray, $state, SearchFilter) {
 
   var orgs_ref = firebase.database().ref("Orgs");
   var orgs = $firebaseArray(orgs_ref);
@@ -80,6 +80,10 @@ function ($scope, $stateParams, $firebaseArray, $state) {
             })
         })
     });
+
+  $scope.filterList = function(search){
+    $scope.orgs = SearchFilter(orgs_ref).getSearchResults(search);
+  }
 
   $scope.selectOrg = function(name){
     selectedOrg = name;
