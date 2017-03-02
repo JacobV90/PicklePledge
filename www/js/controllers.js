@@ -82,7 +82,18 @@ function ($scope, $stateParams, $firebaseArray, $state, SearchFilter) {
     });
 
   $scope.filterList = function(search){
-    $scope.orgs = SearchFilter(orgs_ref).getSearchResults(search);
+    if(search != ""){
+      $scope.orgs = SearchFilter(orgs_ref).getSearchResults(search);
+    }
+    else{
+      $scope.orgs = [];
+      angular.forEach(orgs, function(org) {
+          $scope.orgs.push({
+            name: org.$id,
+            checked: false
+          })
+      })
+    }
   }
 
   $scope.selectOrg = function(name){

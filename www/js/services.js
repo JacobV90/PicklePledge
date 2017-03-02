@@ -8,15 +8,12 @@ function ($firebaseAuth) {
 .factory("SearchFilter", ["$firebaseArray",
 function ($firebaseArray) {
   var compare = function(entry, search){
-    for( var i = 0; i < search.length; i++){
-      if(entry.charAt(i) == search.charAt(i)){
-        console.log(true)
-        return true;
-      }
-      else{
-        console.log(false)
-        return false;
-      }
+    var regex = new RegExp(search, 'gi');
+    var res = entry.match(regex);
+    if(res != null){
+      return true;
+    }else{
+      return false;
     }
   }
   var ListWithFilter = $firebaseArray.$extend({
@@ -25,7 +22,6 @@ function ($firebaseArray) {
 
       this.$list.$loaded()
         .then(function(list){
-          console.log("loaded")
           angular.forEach(list, function(rec) {
             if(compare(rec.$id, search)){
               orgList.push({
