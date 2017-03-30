@@ -21,3 +21,11 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 // Include all of Ionic
 @import "www/lib/ionic/scss/ionic";
 
+.signup{
+  margin-top: 60px;
+}
+
+.filter{
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}

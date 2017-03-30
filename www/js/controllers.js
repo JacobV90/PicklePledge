@@ -59,8 +59,59 @@ function ($scope, $state, Auth, $ionicLoading) {
     });
   }
 
+  $scope.selectNewsletter = function(checked){
+    console.log("jhi")
+    console.log(checked);
+  }
+
 
 }])
+
+.controller('registerOrgCtrl', function($scope, $stateParams, $ionicLoading, Auth, $firebaseArray){
+
+  var db_ref = firebase.database().ref();
+  var orgs_ref = db_ref.child('Orgs');
+  var orgs = $firebaseArray(orgs_ref);
+  var accessCode;
+
+  db_ref.child('Access').on('value', function(data){
+    accessCode = data.val();
+  })
+
+  $scope.submit = function(orgName, email, password, code){
+
+    if(code == accessCode){
+
+      $ionicLoading.show({
+        template: 'Registering your organization...'
+      })
+
+      Auth.$createUserWithEmailAndPassword(email, password)
+          .then(function (newUser) {
+
+            orgs.$add({
+              name: orgName,
+              email: email
+            })
+
+            $ionicLoading.hide()
+
+            $state.go('chooseOrganization', {
+              email: email
+            },{
+              reload: true
+            })
+      }).catch(function (error) {
+            $ionicLoading.hide()
+            alert(error)
+      });
+
+    }else{
+      console.log("oops invalid access code");
+    }
+
+  }
+})
 
 .controller('chooseOrganizationCtrl', ['$scope', '$stateParams', "$firebaseArray", "$state", "SearchFilter",
 function ($scope, $stateParams, $firebaseArray, $state, SearchFilter) {
@@ -73,12 +124,7 @@ function ($scope, $stateParams, $firebaseArray, $state, SearchFilter) {
 
   orgs.$loaded()
     .then(function(){
-        angular.forEach(orgs, function(org) {
-            $scope.orgs.push({
-              name: org.$id,
-              checked: false
-            })
-        })
+        setOrgList();
     });
 
   $scope.filterList = function(search){
@@ -87,12 +133,7 @@ function ($scope, $stateParams, $firebaseArray, $state, SearchFilter) {
     }
     else{
       $scope.orgs = [];
-      angular.forEach(orgs, function(org) {
-          $scope.orgs.push({
-            name: org.$id,
-            checked: false
-          })
-      })
+      setOrgList();
     }
   }
 
@@ -118,6 +159,15 @@ function ($scope, $stateParams, $firebaseArray, $state, SearchFilter) {
     }else{
       console.log("org not selected")
     }
+  }
+
+  function setOrgList(){
+    angular.forEach(orgs, function(org) {
+        $scope.orgs.push({
+          name: org.name,
+          checked: false
+        })
+    })
   }
 
 }])

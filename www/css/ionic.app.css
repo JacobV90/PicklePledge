@@ -1,4 +1,20 @@
 @charset "UTF-8";
+/*
+To customize the look and feel of Ionic, you can override the variables
+in ionic's _variables.scss file.
+
+For example, you might change some of the default colors:
+
+$light:                           #fff !default;
+$stable:                          #f8f8f8 !default;
+$positive:                        #387ef5 !default;
+$calm:                            #11c1f3 !default;
+$balanced:                        #33cd5f !default;
+$energized:                       #ffc900 !default;
+$assertive:                       #ef473a !default;
+$royal:                           #886aea !default;
+$dark:                            #444 !default;
+*/
 /*!
   Ionicons, v2.0.1
   Created by Ben Sperry for the Ionic Framework, http://ionicons.com/
@@ -10,6 +26,22 @@
   used under CC BY http://creativecommons.org/licenses/by/4.0/
   Modified icons to fit ionicon’s grid from original.
 */
+
+
+.signup{
+  /*margin-top: 60px;*/
+}
+
+.filter{
+  height: 100vh !important;
+  background-color: rgba(0,0,0,0.5);
+  background-size: cover;
+}
+
+.noborder{
+  border-width: 0px !important;
+}
+
 @font-face {
   font-family: "Ionicons";
   src: url("../lib/ionic/fonts/ionicons.eot?v=2.0.1");
@@ -9799,5 +9831,5 @@ a.button {
   -webkit-transition-duration: 0s;
   transition-duration: 0s; }
 
-.noborder {
-  border: 0px; }
+.signup {
+  margin-top: 50px; }

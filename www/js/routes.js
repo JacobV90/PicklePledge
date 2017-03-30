@@ -28,6 +28,17 @@ angular.module('app.routes', [])
     controller: 'signupCtrl'
   })
 
+  .state('register', {
+    url: '/register',
+    templateUrl: 'templates/register.html'
+  })
+
+  .state('registerOrg', {
+    url: '/registration',
+    templateUrl: 'templates/addOrganization.html',
+    controller: 'registerOrgCtrl'
+  })
+
   .state('chooseOrganization', {
     url: '/organization',
     templateUrl: 'templates/chooseOrganization.html',

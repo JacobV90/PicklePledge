@@ -1,4 +1,4 @@
-<ion-view title="User Signup" id="page7" style="background-color:default;">
+<ion-view title="Org Signup" id="page7" style="background-color:default;">
   <ion-nav-bar class="bar-balanced">
     <ion-nav-back-button></ion-nav-back-button>
   </ion-nav-bar>
@@ -8,6 +8,10 @@
       <div class="card-block">
         <form id="signup-form3" class="list" name='signup' novalidate>
           <div class="list">
+
+            <label class="item item-input" id="signup-input7">
+              <input type="text" name="org" placeholder="Organization" ng-model="org" ng-required='true'>
+            </label>
 
             <label class="item item-input" id="signup-input7">
               <input type="email" name="email" placeholder="Email" ng-model="email" ng-required='true'>
@@ -23,24 +27,23 @@
                ng-model="pw2" ng-minlength="6" ng-required pw-check='pw1'/>
             </label>
 
-
-              <ion-checkbox ng-model="checked"
-                            ng-change="selectNewsletter(checked)">
-                    Spark Plug Newsletter
-              </ion-checkbox>
+            <label class="item item-input" id="signup-input9">
+              <input type="text" placeholder="Access Code" name="access" ng-model="acess" ng-required='true'/>
+            </label>
 
             <div class="padding">
                 <p ng-show="signup.email.$invalid && !signup.email.$pristine">* Must be an email address</p>
+                <p ng-show="signup.org.$error.required && !signup.email.$pristine">* Organization name is required</p>
+                <p ng-show="signup.access.$error.required && !signup.email.$pristine">* Access code is required</p>
                 <p ng-show="signup.pw1.$error.required">* Password is required</p>
                 <p ng-show="signup.pw1.$error.minlength">* Password must be longer than 6 characters</p>
                 <span class='msg-error' ng-show='signup.pw2.$error.pwmatch'>
                   Passwords don't match.
                 </span>
             </div>
-
             <div class="padding">
-                <button type="button" class="button button-block button-balanced" ng-disabled="signup.$invalid" ng-click="submit(email,pw1)">
-                  Choose Your Organization
+                <button type="button" class="button button-block button-balanced" ng-disabled="signup.$invalid" ng-click="submit(org,email,pw2,acess)">
+                  Add Organization
                 </button>
             </div>
 

@@ -23,9 +23,9 @@ function ($firebaseArray) {
       this.$list.$loaded()
         .then(function(list){
           angular.forEach(list, function(rec) {
-            if(compare(rec.$id, search)){
+            if(compare(rec.name, search)){
               orgList.push({
-                name: rec.$id,
+                name: rec.name,
                 checked: false,
               })
             }
