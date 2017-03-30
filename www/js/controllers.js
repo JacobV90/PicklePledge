@@ -34,8 +34,11 @@ function ($scope, $stateParams, Auth, $ionicLoading, $ionicPopup, $state) {
 
 }])
 
-.controller('signupCtrl', ['$scope', '$state', 'Auth', '$ionicLoading',
-function ($scope, $state, Auth, $ionicLoading) {
+.controller('signupCtrl', ['$scope', '$state', 'Auth', '$ionicLoading', '$firebaseArray',
+function ($scope, $state, Auth, $ionicLoading, $firebaseArray) {
+
+  var users_ref = firebase.database().ref("Users");
+  var users = $firebaseArray(users_ref);
 
   $scope.submit = function(email, password){
 
@@ -45,6 +48,11 @@ function ($scope, $state, Auth, $ionicLoading) {
 
     Auth.$createUserWithEmailAndPassword(email, password)
         .then(function (newUser) {
+
+          users.$add({
+            email: email,
+            whine_fine: 0
+          })
 
           $ionicLoading.hide()
 
@@ -60,7 +68,6 @@ function ($scope, $state, Auth, $ionicLoading) {
   }
 
   $scope.selectNewsletter = function(checked){
-    console.log("jhi")
     console.log(checked);
   }
 
@@ -89,11 +96,6 @@ function ($scope, $state, Auth, $ionicLoading) {
       Auth.$createUserWithEmailAndPassword(email, password)
           .then(function (newUser) {
 
-            orgs.$add({
-              name: orgName,
-              email: email
-            })
-
             $ionicLoading.hide()
 
             $state.go('chooseOrganization', {
@@ -101,6 +103,7 @@ function ($scope, $state, Auth, $ionicLoading) {
             },{
               reload: true
             })
+
       }).catch(function (error) {
             $ionicLoading.hide()
             alert(error)
@@ -118,6 +121,7 @@ function ($scope, $stateParams, $firebaseArray, $state, SearchFilter) {
 
   var orgs_ref = firebase.database().ref("Orgs");
   var orgs = $firebaseArray(orgs_ref);
+  var users_ref = firebase.database().ref("Users");
   var selectedOrg;
 
   $scope.orgs = [];
@@ -150,9 +154,11 @@ function ($scope, $stateParams, $firebaseArray, $state, SearchFilter) {
 
   $scope.submitOrg = function(){
     if(selectedOrg){
-      var users = $firebaseArray(orgs_ref.child(selectedOrg+"/Users/"));
+      var users = $firebaseArray(users_ref);
       users.$add({
-        email: $stateParams.email
+        email: $stateParams.email,
+        org: selectedOrg,
+        whine_fine: 0
       }).then(function(){
         $state.go('pickleJar')
       })
@@ -172,10 +178,29 @@ function ($scope, $stateParams, $firebaseArray, $state, SearchFilter) {
 
 }])
 
-.controller('pickleJarCtrl', ['$scope', '$stateParams', // The following is the constructor function for this page's controller. See https://docs.angularjs.org/guide/controller
+.controller('pickleJarCtrl', ['$scope', '$stateParams', '$firebaseObject', '$state', 'Auth',// The following is the constructor function for this page's controller. See https://docs.angularjs.org/guide/controller
 // You can include any angular dependencies as parameters for this function
 // TIP: Access Route Parameters for your page via $stateParams.parameterName
-function ($scope, $stateParams) {
+function ($scope, $stateParams, $firebaseObject, $state, Auth) {
+
+  var user_auth = Auth.$getAuth();
+  var users_ref = firebase.database().ref("Users/"+user_auth.uid);
+
+  $scope.logout = function(){
+    firebase.auth().signOut().then(function(){
+      $state.go("login", {reload: true})
+    })
+  }
+
+  $scope.addWhineFine = function(){
+    var user = $firebaseObject(users_ref);
+    console.log(user_auth)
+    user.whine_fine += 0.25
+    user.$save().then(function(){
+      console.log("successfully added money")
+    })
+
+  }
 
 
 }])
