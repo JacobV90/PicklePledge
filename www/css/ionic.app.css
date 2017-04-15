@@ -26,22 +26,6 @@ $dark:                            #444 !default;
   used under CC BY http://creativecommons.org/licenses/by/4.0/
   Modified icons to fit ionicon’s grid from original.
 */
-
-
-.signup{
-  /*margin-top: 60px;*/
-}
-
-.filter{
-  height: 100vh !important;
-  background-color: rgba(0,0,0,0.5);
-  background-size: cover;
-}
-
-.noborder{
-  border-width: 0px !important;
-}
-
 @font-face {
   font-family: "Ionicons";
   src: url("../lib/ionic/fonts/ionicons.eot?v=2.0.1");
@@ -9832,4 +9816,8 @@ a.button {
   transition-duration: 0s; }
 
 .signup {
-  margin-top: 50px; }
+  margin-top: 60px; }
+
+.filter {
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); }
