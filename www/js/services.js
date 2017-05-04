@@ -5,6 +5,37 @@ function ($firebaseAuth) {
     return $firebaseAuth();
 }])
 
+.factory("Storage", function($window, $rootScope) {
+    angular.element($window).on('storage', function(event) {
+        if (event.key === 'user') {
+            $rootScope.$apply();
+        }
+    });
+    return {
+        setData: function(entry, val) {
+            $window.localStorage.setItem(entry, JSON.stringify(val));
+            return this;
+        },
+        getData: function(entry) {
+            return JSON.parse($window.localStorage.getItem(entry));
+        },
+        clearData: function(entry){
+            $window.localStorage.removeItem(entry);
+            console.log($window.localStorage.getItem(entry));
+            return this
+        }
+    };
+})
+
+.factory("User", function (Auth, $firebaseArray) {
+    var user_auth = Auth.$getAuth();
+    var users_ref = firebase.database().ref("Users/");
+    var users = $firebaseArray(users_ref);
+    $scope.date = new Date().toDateString();
+    var current_log = null;
+
+})
+
 .factory("SearchFilter", ["$firebaseArray",
 function ($firebaseArray) {
   var compare = function(entry, search){
