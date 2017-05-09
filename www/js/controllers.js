@@ -30,9 +30,10 @@ function ($scope, $stateParams, Auth, $ionicLoading, $ionicPopup, $state, $rootS
           template: error.message
         })
         $ionicLoading.hide();
+        $sta
     });
 
-  }
+  };
 
   function setUserData(email){
       users.$loaded().then(function(){
@@ -50,40 +51,49 @@ function ($scope, $stateParams, Auth, $ionicLoading, $ionicPopup, $state, $rootS
 
 }])
 
-.controller('signupCtrl', ['$scope', '$state', 'Auth', '$ionicLoading', '$firebaseArray','$rootScope',
-function ($scope, $state, Auth, $ionicLoading, $firebaseArray, $rootScope) {
 
+.controller('signupCtrl', ['$scope', '$state', 'Auth', '$ionicLoading', "$stateParams", "$firebaseArray",
+function ($scope, $state, Auth, $ionicLoading, $stateParams, $firebaseArray) {
 
+    var accessCode = "";
 
-  $scope.submit = function(email, password){
+    var db_ref = firebase.database().ref();
+
+    db_ref.child('Access').on('value', function(data){
+        accessCode = data.val();
+    });
+
+  $scope.type = $stateParams.type;
+
+  $scope.submit = function(email, password, access){
 
     $ionicLoading.show({
       template: 'Signing you up...'
     })
 
-    Auth.$createUserWithEmailAndPassword(email, password)
-        .then(function (newUser) {
+    if(access.localeCompare(accessCode.toString()) === 0){
 
-            var users_ref = firebase.database().ref("Users");
-            var users = $firebaseArray(users_ref);
+        Auth.$createUserWithEmailAndPassword(email, password)
+            .then(function (newUser) {
 
-            $ionicLoading.hide();
+                $ionicLoading.hide();
 
-            users.$add({
-                email: email,
-                org: ""
-            }).then(function(){
+                if($scope.type.localeCompare('user') === 0){
+                    $state.go('chooseOrganization');
+                }else{
+                    $state.go('registerOrg');
+                }
 
-                $state.go('chooseOrganization', {
-                    reload: true
-                })
+            }).catch(function (error) {
+                $ionicLoading.hide();
+                alert(error);
             });
+    }else{
+        $ionicLoading.hide();
+        alert("Invalid access code");
+    }
 
-    }).catch(function (error) {
-          $ionicLoading.hide()
-          alert(error)
-    });
-  }
+  };
 
   $scope.selectNewsletter = function(checked){
     console.log(checked);
@@ -92,50 +102,58 @@ function ($scope, $state, Auth, $ionicLoading, $firebaseArray, $rootScope) {
 
 }])
 
-.controller('registerOrgCtrl', function($scope, $stateParams, $ionicLoading, Auth, $firebaseArray){
+.controller('registerOrgCtrl', function($scope, $ionicLoading, Auth, $firebaseArray){
 
-  var db_ref = firebase.database().ref();
-  var orgs_ref = db_ref.child('Orgs');
+  var orgs_ref = firebase.database().ref('Orgs/');
   var orgs = $firebaseArray(orgs_ref);
-  var accessCode;
+  $scope.orgsReady = false;
+  $scope.email = Auth.email;
 
-  db_ref.child('Access').on('value', function(data){
-    accessCode = data.val();
-  })
+  orgs.$loaded().then(function(){
+    $scope.orgsReady = true;
+  });
 
-  $scope.submit = function(orgName, email, password, code){
+    $scope.submit = function(orgName){
 
-    if(code == accessCode){
+        $ionicLoading.show({
+            template: 'Registering your organization...'
+        });
 
-      $ionicLoading.show({
-        template: 'Registering your organization...'
-      })
+        var found = findOrg(orgName);
 
-      Auth.$createUserWithEmailAndPassword(email, password)
-          .then(function (newUser) {
+        if(!found){
 
-            $ionicLoading.hide()
-
-            $state.go('chooseOrganization', {
-              email: email
-            },{
-              reload: false
+            orgs.$add({
+                name: orgName,
+                email: $scope.email
             })
 
-      }).catch(function (error) {
-            $ionicLoading.hide()
-            alert(error)
+            $ionicLoading.hide();
+
+        }else{
+
+            $ionicLoading.hide();
+
+            alert("Organization name is already in use");
+        }
+
+    };
+
+  function findOrg(orgName){
+      angular.forEach(orgs, function(org){
+          if(orgName.$viewValue === org.name){
+              console.log("wtf");
+              return true;
+          }
       });
-
-    }else{
-      console.log("oops invalid access code");
-    }
-
+      return false;
   }
+
+
 })
 
-.controller('chooseOrganizationCtrl', ['$scope', "$firebaseArray", "$state", "SearchFilter",'Auth','$firebaseObject', "$ionicLoading",
-function ($scope, $firebaseArray, $state, SearchFilter, Auth, $firebaseObject, $ionicLoading) {
+
+.controller('chooseOrganizationCtrl', function ($scope, $stateParams, $firebaseArray, $state, SearchFilter, Auth, $rootScope) {
 
     var orgs_ref = firebase.database().ref("Orgs");
     var orgs = $firebaseArray(orgs_ref);
@@ -190,20 +208,29 @@ function ($scope, $firebaseArray, $state, SearchFilter, Auth, $firebaseObject, $
   }
 
   $scope.submitOrg = function(){
+
+
+      console.log(Auth.email);
     if(selectedOrg){
 
-      current_user.org = selectedOrg;
-      current_user.$save();
+        var users_ref = firebase.database().ref("Users/");
+        var users = $firebaseArray(users_ref);
 
-      current_log.whine_fine = 0;
-      current_log.$save();
+        $rootScope.email = user_auth.email;
+        $rootScope.org = selectedOrg;
 
-      console.log(current_user)
+        users.$add({
+            email: user_auth.email,
+            org: selectedOrg
+        }).then(function(){
 
-        $state.go('pickleJar')
+            $state.go("pickleJar");
+        }).catch(function(err){
+            console.log(err);
+        });
 
     }else{
-      console.log("org not selected")
+      console.log("org not selected");
     }
   }
 
@@ -216,7 +243,7 @@ function ($scope, $firebaseArray, $state, SearchFilter, Auth, $firebaseObject, $
     })
   }
 
-}])
+})
 
 .controller('pickleJarCtrl', ['$scope', '$stateParams', '$firebaseArray', '$state', 'Auth','$firebaseObject', "$ionicSideMenuDelegate", "Storage", "$rootScope",// The following is the constructor function for this page's controller. See https://docs.angularjs.org/guide/controller
 // You can include any angular dependencies as parameters for this function

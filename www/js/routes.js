@@ -25,7 +25,10 @@ angular.module('app.routes', [])
   .state('signup', {
     url: '/signup',
     templateUrl: 'templates/signup.html',
-    controller: 'signupCtrl'
+    controller: 'signupCtrl',
+    params:{
+      type: null
+    }
   })
 
   .state('register', {

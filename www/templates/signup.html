@@ -23,6 +23,10 @@
                ng-model="pw2" ng-minlength="6" ng-required pw-check='pw1'/>
             </label>
 
+              <label class="item item-input" id="signup-input9">
+                  <input type="text" placeholder="Access Code" name="access" ng-model="access" ng-required='true'/>
+              </label>
+
 
               <ion-checkbox ng-model="checked"
                             ng-change="selectNewsletter(checked)">
@@ -33,13 +37,19 @@
                 <p ng-show="signup.email.$invalid && !signup.email.$pristine">* Must be an email address</p>
                 <p ng-show="signup.pw1.$error.required">* Password is required</p>
                 <p ng-show="signup.pw1.$error.minlength">* Password must be longer than 6 characters</p>
+                <p ng-show="signup.access.$error.required && !signup.access.$pristine">* Access code is required</p>
                 <span class='msg-error' ng-show='signup.pw2.$error.pwmatch'>
                   Passwords don't match.
                 </span>
             </div>
 
             <div class="padding">
-                <button type="button" class="button button-block button-balanced" ng-disabled="signup.$invalid" ng-click="submit(email,pw1)">
+
+                <button ng-show="type==='organizer'" type="button" class="button button-block button-balanced" ng-disabled="signup.$invalid" ng-click="submit(email,pw1,access)">
+                    Register Your Organization
+                </button>
+
+                <button ng-show="type==='user'" type="button" class="button button-block button-balanced" ng-disabled="signup.$invalid" ng-click="submit(email,pw1,access)">
                   Choose Your Organization
                 </button>
             </div>

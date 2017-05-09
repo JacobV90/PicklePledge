@@ -1,59 +1,34 @@
-<ion-view title="Org Signup" id="page7" style="background-color:default;">
+<ion-view title="Sign Up" id="page7" style="background-color:default;">
   <ion-nav-bar class="bar-balanced">
     <ion-nav-back-button></ion-nav-back-button>
   </ion-nav-bar>
   <ion-content  class="has-header">
 
-    <div class="card signup">
+    <div class="card signup" ng-show="orgsReady">
       <div class="card-block">
+
         <form id="signup-form3" class="list" name='signup' novalidate>
           <div class="list">
 
             <label class="item item-input" id="signup-input7">
-              <input type="text" name="org" placeholder="Organization" ng-model="org" ng-required='true'>
-            </label>
-
-            <label class="item item-input" id="signup-input7">
-              <input type="email" name="email" placeholder="Email" ng-model="email" ng-required='true'>
-            </label>
-
-            <label class="item item-input" id="signup-input8">
-              <input type="password" id='pw1' name="pw1" placeholder="Password"
-              ng-model="pw1" ng-minlength="6" ng-required/>
-            </label>
-
-            <label class="item item-input" id="signup-input9">
-              <input type="password"  id="pw2" placeholder="Confirm Password" name="pw2"
-               ng-model="pw2" ng-minlength="6" ng-required pw-check='pw1'/>
-            </label>
-
-            <label class="item item-input" id="signup-input9">
-              <input type="text" placeholder="Access Code" name="access" ng-model="acess" ng-required='true'/>
+              <input type="text" name="Org" placeholder="Organization Name" ng-model="org" ng-required='true'>
             </label>
 
             <div class="padding">
-                <p ng-show="signup.email.$invalid && !signup.email.$pristine">* Must be an email address</p>
-                <p ng-show="signup.org.$error.required && !signup.email.$pristine">* Organization name is required</p>
-                <p ng-show="signup.access.$error.required && !signup.email.$pristine">* Access code is required</p>
-                <p ng-show="signup.pw1.$error.required">* Password is required</p>
-                <p ng-show="signup.pw1.$error.minlength">* Password must be longer than 6 characters</p>
-                <span class='msg-error' ng-show='signup.pw2.$error.pwmatch'>
-                  Passwords don't match.
-                </span>
+                <p ng-show="signup.Org.$invalid && !signup.Org.$pristine">Please provide a valid name</p>
             </div>
+
             <div class="padding">
-                <button type="button" class="button button-block button-balanced" ng-disabled="signup.$invalid" ng-click="submit(org,email,pw2,acess)">
-                  Add Organization
+                <button type="button" class="button button-block button-balanced" ng-disabled="signup.$invalid" ng-click="submit(org)">
+                  Add
                 </button>
             </div>
 
           </div>
         </form>
-      </div>
-    </div>
-      </div>
-    </div>
 
+      </div>
+    </div>
 
   </ion-content>
 </ion-view>
