@@ -51,21 +51,38 @@ angular.module('app.routes', [])
     }
   })
 
-  .state('pickleJar', {
-    url: '/picklejar',
-    templateUrl: 'templates/pickleJar.html',
-    controller: 'pickleJarCtrl',
-    resolve: {
+
+  .state('app', {
+      url: '/app',
+      abstract: true,
+      templateUrl: 'templates/pickleJar.html',
+      controller: 'pickleJarCtrl'
+  })
+
+  .state('app.pickleJar', {
+      url: '/picklejar',
+      views: {
+          'menuContent': {
+              templateUrl: 'templates/pickle_jar.html',
+              controller: 'pickleJarCtrl'
+          }
+      },
+      resolve: {
         "currentAuth": ["Auth", function (Auth) {
                 return Auth.$requireSignIn();
             }]
-    }
+    },
+      cache: false
   })
 
-  .state('about', {
+  .state('app.about', {
     url: '/about',
-    templateUrl: 'templates/about.html',
-    controller: 'aboutCtrl'
+      views: {
+          'menuContent': {
+              templateUrl: 'templates/about.html',
+              controller: 'aboutCtrl'
+          }
+      }
   })
 
 $urlRouterProvider.otherwise('/welcome')
