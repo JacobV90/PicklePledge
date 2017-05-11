@@ -36,7 +36,13 @@ angular.module('app.controllers', [])
                     if (user.email == email) {
                         $rootScope.email = user.email;
                         $rootScope.org = user.org;
-                        $state.go('app.pickleJar', {reload: true});
+
+                        if(user.type == "organizer"){
+                            $state.go('organizer');
+                        }else{
+                            $state.go('app.pickleJar', {reload: true});
+                        }
+
                         $ionicLoading.hide();
                     }
                 });
@@ -49,8 +55,8 @@ angular.module('app.controllers', [])
     .controller('signupCtrl', function ($scope, $state, Auth, $ionicLoading, $stateParams, $firebaseArray) {
 
         var accessCode = "";
-
         var db_ref = firebase.database().ref();
+        var Checked = false;
 
         db_ref.child('Access').on('value', function (data) {
             accessCode = data.val();
@@ -68,6 +74,10 @@ angular.module('app.controllers', [])
 
                 Auth.$createUserWithEmailAndPassword(email, password)
                     .then(function (newUser) {
+
+                        if(Checked){
+                            emailSparkPlug(email);
+                        }
 
                         $ionicLoading.hide();
 
@@ -90,17 +100,28 @@ angular.module('app.controllers', [])
 
         $scope.selectNewsletter = function (checked) {
             console.log(checked);
+            Checked = checked
         }
 
+        function emailSparkPlug(email){
+            emailjs.send("default_service","sparkplug_newsletter",{name: "Jacob", notes: email})
+                .then(function(response) {
+                    console.log("SUCCESS. status=%d, text=%s", response.status, response.text);
+                }, function(err) {
+                    console.log("FAILED. error=", err);
+                });
+        }
 
     })
 
-    .controller('registerOrgCtrl', function ($scope, $ionicLoading, Auth, $firebaseArray) {
+    .controller('registerOrgCtrl', function ($scope, $ionicLoading, Auth, $firebaseArray, $state, $stateParams) {
 
         var orgs_ref = firebase.database().ref('Orgs/');
         var orgs = $firebaseArray(orgs_ref);
+        var users_ref = firebase.database().ref("Users/");
+        var users = $firebaseArray(users_ref);
         $scope.orgsReady = false;
-        $scope.email = Auth.email;
+        var user_auth = Auth.$getAuth();
 
         orgs.$loaded().then(function () {
             $scope.orgsReady = true;
@@ -118,8 +139,21 @@ angular.module('app.controllers', [])
 
                 orgs.$add({
                     name: orgName,
-                    email: $scope.email
+                    email: user_auth.email
                 })
+
+                users.$add({
+                    email: user_auth.email,
+                    org: orgName,
+                    type: "organizer",
+                    newsletter: $stateParams.newsletter
+                }).then(function () {
+
+                    $state.go("organizer");
+                }).catch(function (err) {
+                    console.log(err);
+                });
+
 
                 $ionicLoading.hide();
 
@@ -145,8 +179,35 @@ angular.module('app.controllers', [])
 
     })
 
+    .controller('organizerCtrl', function($scope, $firebaseArray, Auth, $state){
+        var interval_ref = firebase.database().ref("Intervals");
+        var intervals = $firebaseArray(interval_ref);
+        var users_ref = firebase.database().ref("Users/");
+        var users = $firebaseArray(users_ref);
 
-    .controller('chooseOrganizationCtrl', function ($scope, $stateParams, $firebaseArray, $state, SearchFilter, Auth, $rootScope) {
+        $scope.intervals = null;
+        $scope.user = null;
+
+        users.$loaded().then(function () {
+            angular.forEach(users, function (user) {
+                if (user.email == Auth.$getAuth().email) {
+                    $scope.user = user;
+                }
+            });
+        });
+
+        intervals.$loaded().then(function(){
+            $scope.intervals = intervals;
+        });
+
+        $scope.logout = function () {
+            firebase.auth().signOut().then(function () {
+                $state.go("welcome", {}, {reload: true});
+            })
+        };
+
+    })
+    .controller('chooseOrganizationCtrl', function ($scope, $stateParams, $firebaseObject, $state, SearchFilter, Auth, $rootScope, $firebaseArray) {
 
         var orgs_ref = firebase.database().ref("Orgs");
         var orgs = $firebaseArray(orgs_ref);
@@ -158,7 +219,6 @@ angular.module('app.controllers', [])
         var users = $firebaseArray(users_ref);
         var current_user = null;
         var selectedOrg;
-
 
         users.$loaded().then(function () {
             angular.forEach(users, function (user) {
@@ -202,8 +262,6 @@ angular.module('app.controllers', [])
 
         $scope.submitOrg = function () {
 
-
-            console.log(Auth.email);
             if (selectedOrg) {
 
                 var users_ref = firebase.database().ref("Users/");
@@ -214,10 +272,12 @@ angular.module('app.controllers', [])
 
                 users.$add({
                     email: user_auth.email,
-                    org: selectedOrg
+                    org: selectedOrg,
+                    type: "user",
+                    newsletter: $stateParams.newsletter
                 }).then(function () {
 
-                    $state.go("pickleJar");
+                    $state.go("app.pickleJar");
                 }).catch(function (err) {
                     console.log(err);
                 });
@@ -252,7 +312,9 @@ angular.module('app.controllers', [])
         users.$loaded().then(function () {
             angular.forEach(users, function (user) {
                 if (user.email == user_auth.email) {
-                    $scope.logs = user.logs;
+
+                    $scope.email = user.email;
+                    $scope.org = user.org;
                     var log_ref = firebase.database().ref("Users/" + user.$id + "/logs/" + $scope.date);
                     var logs_ref = firebase.database().ref("Users/" + user.$id + "/logs");
                     var logs = $firebaseArray(logs_ref);

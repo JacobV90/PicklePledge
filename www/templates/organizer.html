@@ -1,10 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<ion-view title="Organizer">
+    <ion-nav-bar class="bar-balanced">
+    </ion-nav-bar>
+    <ion-content>
+        <div class="card list">
+            <div class="item" style="text-align: center">
+                {{user.email}}<br/>
+                {{user.org}}
+            </div>
+            <div class="item no-border">
+                <h2 style="text-align: center">Intervals</h2>
+            </div>
+            <div class="item row">
+                <div class="col" style="text-align: center">Start</div>
+                <div class="col" style="text-align: center">End</div>
+            </div>
+            <div class="item row no-border" ng-repeat="interval in intervals">
+                <div class="col" style="text-align: center">{{interval.start}}</div>
+                <div class="col" style="text-align: center">{{interval.end}}</div>
+            </div>
+        </div>
 
-</body>
-</html>
+
+            <button type="button" class="button button-block button-balanced" ng-click="logout()">
+                Log Out
+            </button>
+
+    </ion-content>
+</ion-view>
