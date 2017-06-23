@@ -54,15 +54,19 @@ angular.module('app.controllers', [])
 
     .controller('signupCtrl', function ($scope, $state, Auth, $ionicLoading, $stateParams, $firebaseArray) {
 
-        var accessCode = "";
-        var db_ref = firebase.database().ref();
-        var Checked = false;
+        var orgs_ref = firebase.database().ref("Orgs");
+        var orgs = $firebaseArray(orgs_ref);
+        var m_ValidOrgName = "";
+        var m_bIsUserAccessCodeValid = false;
+        var m_bNewsletterStatus = false;
 
-        db_ref.child('Access').on('value', function (data) {
-            accessCode = data.val();
+        $scope.OrgsLoaded = false;
+
+        orgs.$loaded().then(function() {
+            angular.forEach(orgs, function (org) {
+                $scope.OrgsLoaded = true;
+            });
         });
-
-        $scope.type = $stateParams.type;
 
         $scope.submit = function (email, password, access) {
 
@@ -70,37 +74,49 @@ angular.module('app.controllers', [])
                 template: 'Signing you up...'
             })
 
-            if (access.localeCompare(accessCode.toString()) === 0) {
+            IsAccessCodeInTheDB(access);
+
+            if (m_bIsUserAccessCodeValid) {
 
                 Auth.$createUserWithEmailAndPassword(email, password)
-                    .then(function (newUser) {
-
-                        if(Checked){
-                            emailSparkPlug(email);
-                        }
+                    .then(function () {
+                        
+                        var users_ref = firebase.database().ref("Users/");
+                        var users = $firebaseArray(users_ref);
+                        
+                        // Add user to Firebase database
+                        users.$add({
+                            email: email,
+                            org: m_ValidOrgName,
+                            newsletterStatus: m_bNewsletterStatus
+                        }).then(function () {
+                            
+                            if(m_bNewsletterStatus){
+                                emailSparkPlug(email);
+                            }
+                            
+                            $ionicLoading.hide();
+                            $state.go("app.pickleJar");
+                            
+                        }).catch(function (err) {
+                            alert("Server Communication Error: Please try again.");
+                        });
 
                         $ionicLoading.hide();
 
-                        if ($scope.type.localeCompare('user') === 0) {
-                            $state.go('chooseOrganization');
-                        } else {
-                            $state.go('registerOrg');
-                        }
-
                     }).catch(function (error) {
                     $ionicLoading.hide();
-                    alert(error);
+                    alert("User Authentication Error: Pleaes try again.");
                 });
             } else {
                 $ionicLoading.hide();
-                alert("Invalid access code");
+                alert("Invalid Organization Access Code: Please contact your organizer.");
             }
 
         };
 
         $scope.selectNewsletter = function (checked) {
-            console.log(checked);
-            Checked = checked
+            m_bNewsletterStatus = checked
         }
 
         function emailSparkPlug(email){
@@ -111,6 +127,16 @@ angular.module('app.controllers', [])
                     console.log("FAILED. error=", err);
                 });
         }
+
+        function IsAccessCodeInTheDB(access){
+            angular.forEach(orgs, function(org){
+                if(access == org.accessCode){
+                    m_bIsUserAccessCodeValid = true;
+                    m_ValidOrgName = org.name;
+                }
+            })
+        }
+
 
     })
 
@@ -168,7 +194,7 @@ angular.module('app.controllers', [])
 
         function findOrg(orgName) {
             angular.forEach(orgs, function (org) {
-                if (orgName.$viewValue === org.name) {
+                if (orgName === org.name) {
                     console.log("wtf");
                     return true;
                 }

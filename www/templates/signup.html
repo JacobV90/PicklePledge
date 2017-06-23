@@ -45,12 +45,8 @@
 
             <div class="padding">
 
-                <button ng-show="type==='organizer'" type="button" class="button button-block button-balanced" ng-disabled="signup.$invalid" ng-click="submit(email,pw1,access)">
-                    Register Your Organization
-                </button>
-
-                <button ng-show="type==='user'" type="button" class="button button-block button-balanced" ng-disabled="signup.$invalid" ng-click="submit(email,pw1,access)">
-                  Choose Your Organization
+                <button ng-show="OrgsLoaded" type="button" class="button button-block button-balanced" ng-disabled="signup.$invalid" ng-click="submit(email,pw1,access)">
+                  Submit
                 </button>
             </div>
 
