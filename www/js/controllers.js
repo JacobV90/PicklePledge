@@ -18,13 +18,18 @@ angular.module('app.controllers', [])
             })
 
             Auth.$signInWithEmailAndPassword(email, password)
-                .then(function (authData) {
-                    setUserData(email);
+                .then(function () {
+
+                    $ionicLoading.hide();
+                    $state.go('app.pickleJar', {reload: true});
+
                 }).catch(function (error) {
+
                 $ionicPopup.alert({
-                    title: 'Login Error',
+                    title: 'Login Error. Please Try Again',
                     template: error.message
-                })
+                });
+
                 $ionicLoading.hide();
             });
 
@@ -40,10 +45,8 @@ angular.module('app.controllers', [])
                         if(user.type == "organizer"){
                             $state.go('organizer');
                         }else{
-                            $state.go('app.pickleJar', {reload: true});
                         }
 
-                        $ionicLoading.hide();
                     }
                 });
             });
@@ -140,198 +143,15 @@ angular.module('app.controllers', [])
 
     })
 
-    .controller('registerOrgCtrl', function ($scope, $ionicLoading, Auth, $firebaseArray, $state, $stateParams) {
-
-        var orgs_ref = firebase.database().ref('Orgs/');
-        var orgs = $firebaseArray(orgs_ref);
-        var users_ref = firebase.database().ref("Users/");
-        var users = $firebaseArray(users_ref);
-        $scope.orgsReady = false;
-        var user_auth = Auth.$getAuth();
-
-        orgs.$loaded().then(function () {
-            $scope.orgsReady = true;
-        });
-
-        $scope.submit = function (orgName) {
-
-            $ionicLoading.show({
-                template: 'Registering your organization...'
-            });
-
-            var found = findOrg(orgName);
-
-            if (!found) {
-
-                orgs.$add({
-                    name: orgName,
-                    email: user_auth.email
-                })
-
-                users.$add({
-                    email: user_auth.email,
-                    org: orgName,
-                    type: "organizer",
-                    newsletter: $stateParams.newsletter
-                }).then(function () {
-
-                    $state.go("organizer");
-                }).catch(function (err) {
-                    console.log(err);
-                });
-
-
-                $ionicLoading.hide();
-
-            } else {
-
-                $ionicLoading.hide();
-
-                alert("Organization name is already in use");
-            }
-
-        };
-
-        function findOrg(orgName) {
-            angular.forEach(orgs, function (org) {
-                if (orgName === org.name) {
-                    console.log("wtf");
-                    return true;
-                }
-            });
-            return false;
-        }
-
-
-    })
-
-    .controller('organizerCtrl', function($scope, $firebaseArray, Auth, $state){
-        var interval_ref = firebase.database().ref("Intervals");
-        var intervals = $firebaseArray(interval_ref);
-        var users_ref = firebase.database().ref("Users/");
-        var users = $firebaseArray(users_ref);
-
-        $scope.intervals = null;
-        $scope.user = null;
-
-        users.$loaded().then(function () {
-            angular.forEach(users, function (user) {
-                if (user.email == Auth.$getAuth().email) {
-                    $scope.user = user;
-                }
-            });
-        });
-
-        intervals.$loaded().then(function(){
-            $scope.intervals = intervals;
-        });
-
-        $scope.logout = function () {
-            firebase.auth().signOut().then(function () {
-                $state.go("welcome", {}, {reload: true});
-            })
-        };
-
-    })
-    .controller('chooseOrganizationCtrl', function ($scope, $stateParams, $firebaseObject, $state, SearchFilter, Auth, $rootScope, $firebaseArray) {
-
-        var orgs_ref = firebase.database().ref("Orgs");
-        var orgs = $firebaseArray(orgs_ref);
-        var date = new Date().toDateString();
-
+    .controller('pickleJarCtrl', function ($scope, $stateParams, $firebaseArray, $state, Auth, $firebaseObject,
+                                           $ionicSideMenuDelegate, $window) {
 
         var user_auth = Auth.$getAuth();
         var users_ref = firebase.database().ref("Users/");
         var users = $firebaseArray(users_ref);
-        var current_user = null;
-        var selectedOrg;
-
-        users.$loaded().then(function () {
-            angular.forEach(users, function (user) {
-                if (user.email == user_auth.email) {
-                    console.log(user.$id)
-                    var current_user_ref = firebase.database().ref("Users/" + user.$id + "/");
-                    var log_ref = firebase.database().ref("Users/" + user.$id + "/logs/" + date);
-                    current_user = $firebaseObject(current_user_ref);
-                    current_log = $firebaseObject(log_ref);
-                }
-            })
-        })
-
-        $scope.orgs = [];
-
-        orgs.$loaded()
-            .then(function () {
-                setOrgList();
-            });
-
-        $scope.filterList = function (search) {
-            if (search != "") {
-                $scope.orgs = SearchFilter(orgs_ref).getSearchResults(search);
-            }
-            else {
-                $scope.orgs = [];
-                setOrgList();
-            }
-        }
-
-        $scope.selectOrg = function (name) {
-            selectedOrg = name;
-            var index = 0;
-            angular.forEach($scope.orgs, function (org) {
-                if (org.name != selectedOrg) {
-                    $scope.orgs[index].checked = false;
-                }
-                ++index;
-            })
-        }
-
-        $scope.submitOrg = function () {
-
-            if (selectedOrg) {
-
-                var users_ref = firebase.database().ref("Users/");
-                var users = $firebaseArray(users_ref);
-
-                $rootScope.email = user_auth.email;
-                $rootScope.org = selectedOrg;
-
-                users.$add({
-                    email: user_auth.email,
-                    org: selectedOrg,
-                    type: "user",
-                    newsletter: $stateParams.newsletter
-                }).then(function () {
-
-                    $state.go("app.pickleJar");
-                }).catch(function (err) {
-                    console.log(err);
-                });
-
-            } else {
-                console.log("org not selected");
-            }
-        }
-
-        function setOrgList() {
-            angular.forEach(orgs, function (org) {
-                $scope.orgs.push({
-                    name: org.name,
-                    checked: false
-                })
-            })
-        }
-
-    })
-
-    .controller('pickleJarCtrl', function ($scope, $stateParams, $firebaseArray, $state, Auth, $firebaseObject, $ionicSideMenuDelegate, $window) {
-
-        var user_auth = Auth.$getAuth();
-        var users_ref = firebase.database().ref("Users/");
-        var users = $firebaseArray(users_ref);
-        $scope.date = new Date().toDateString();
         var current_log = null;
 
+        $scope.date = new Date().toDateString();
         $scope.total = 0;
         $scope.logs = [];
 
@@ -364,13 +184,16 @@ angular.module('app.controllers', [])
         });
 
         $scope.logout = function () {
+
             $ionicSideMenuDelegate.toggleLeft();
+
+            // Give the side menu some time to close
             setTimeout(function () {
                 firebase.auth().signOut().then(function () {
                     $state.go("welcome", {}, {reload: true})
                     setTimeout(function () {
                         $window.location.reload(true);
-                    }, 150)
+                    }, 5)
                 })
             }, 250);
         };
@@ -398,4 +221,4 @@ angular.module('app.controllers', [])
     .controller('aboutCtrl', function ($scope, $stateParams) {
 
 
-    })
+    });

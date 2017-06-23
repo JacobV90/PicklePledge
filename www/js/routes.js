@@ -8,7 +8,6 @@ angular.module('app.routes', [])
         // Each state's controller can be found in controllers.js
         $stateProvider
 
-
             .state('welcome', {
                 url: '/welcome',
                 templateUrl: 'templates/welcome.html',
@@ -28,36 +27,6 @@ angular.module('app.routes', [])
                 params: {
                     type: null
                 }
-            })
-
-            .state('register', {
-                url: '/register',
-                templateUrl: 'templates/register.html'
-            })
-
-            .state('registerOrg', {
-                url: '/registration',
-                templateUrl: 'templates/addOrganization.html',
-                controller: 'registerOrgCtrl',
-                params:{
-                    newsletter: null
-                }
-            })
-
-            .state('chooseOrganization', {
-                url: '/organization',
-                templateUrl: 'templates/chooseOrganization.html',
-                controller: 'chooseOrganizationCtrl',
-                params: {
-                    email: null,
-                    newsletter: null
-                }
-            })
-
-            .state("organizer", {
-                url: '/organizer',
-                templateUrl: "templates/organizer.html",
-                controller: 'organizerCtrl'
             })
 
             .state('app', {
@@ -94,6 +63,5 @@ angular.module('app.routes', [])
             })
 
         $urlRouterProvider.otherwise('/welcome')
-
 
     });
