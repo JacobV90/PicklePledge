@@ -2,29 +2,35 @@
   <ion-nav-bar class="bar-balanced">
     <ion-nav-back-button></ion-nav-back-button>
   </ion-nav-bar>
-  <ion-content class="has-header">
-    <form class="list" name='login'>
-      <div class="list">
-        <label class="item item-input">
-          <input type="email" name="email" id="email" placeholder="Email"
-          ng-required='true' ng-model="email" ng-minlength="6">
-        </label>
-        <label class="item item-input">
-          <input type="password" placeholder="Password" id='pw' name="pw"
-          ng-required='true' ng-model="pw" ng-minlength="6">
-        </label>
-        <div class="padding">
-            <p ng-show="login.email.$invalid && !login.email.$pristine">* Must be a valid email address</p>
-            <p ng-show="login.pw.$error.required && !login.pw.$pristine">* Password is required</p>
-            <p ng-show="login.pw.$error.minlength">* Password must be longer than 6 characters</p>
-        </div>
-        <div class="padding">
-            <button type="button" class="button button-block button-balanced" ng-disabled="login.$invalid" ng-click="submit(email,pw)">
-              Login
-            </button>
-        </div>
-      </div>
+    <ion-content class="has-header">
+        <div class="card signup">
 
-    </form>
-  </ion-content>
+            <div class="card-block">
+                <form class="list" name='login'>
+                    <div class="list">
+
+                        <label class="item item-input" id="signup-input7">
+                            <input type="email" name="email" placeholder="Email" ng-model="email" ng-required='true' id="email">
+                        </label>
+
+                        <label class="item item-input">
+                            <input type="password" placeholder="Password" id='pw' name="pw"
+                                   ng-required='true' ng-model="pw" ng-minlength="6">
+                        </label>
+                        <div class="padding">
+                            <p ng-show="login.email.$invalid && !login.email.$pristine">* Must be a valid email address</p>
+                            <p ng-show="login.pw.$error.required && !login.pw.$pristine">* Password is required</p>
+                            <p ng-show="login.pw.$error.minlength">* Password must be longer than 6 characters</p>
+                        </div>
+                        <div class="padding">
+                            <button type="button" class="button button-block button-balanced" ng-disabled="login.$invalid" ng-click="submit(email,pw)">
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </ion-content>
 </ion-view>

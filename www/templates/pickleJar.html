@@ -5,8 +5,8 @@
                 <ion-content>
                     <ion-list>
                         <ion-item>
-                            {{email}}<br/>
-                            {{org}}
+                            {{$root.email}}<br/>
+                            {{$root.org}}
                         </ion-item>
                         <ion-item ng-click="goToAbout()">
                             <i class = "icon icon ion-information-circled"> About</i>
@@ -20,8 +20,7 @@
                     </ion-item>
                     <ion-list>
                         <ion-item collection-repeat="log in logs" class="no-border">
-                           {{log.$id}} -
-                            {{log.whine_fine}}
+                           {{log.$id}} - ${{log.whine_fine}}
                         </ion-item>
                     </ion-list>
                 </ion-content>

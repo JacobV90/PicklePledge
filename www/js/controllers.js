@@ -5,10 +5,11 @@ angular.module('app.controllers', [])
 
     })
 
-    .controller('loginCtrl', function ($scope, $stateParams, Auth, $ionicLoading, $ionicPopup, $state, $rootScope, $firebaseArray, $window) {
+    .controller('loginCtrl', function ($scope, $stateParams, Auth, $ionicLoading, $ionicPopup, $state, $rootScope, $firebaseArray, Storage) {
 
         var users_ref = firebase.database().ref("Users/");
         var users = $firebaseArray(users_ref);
+
         $scope.date = new Date().toDateString();
 
         $scope.submit = function (email, password) {
@@ -19,43 +20,39 @@ angular.module('app.controllers', [])
 
             Auth.$signInWithEmailAndPassword(email, password)
                 .then(function () {
-
-                    $ionicLoading.hide();
-                    $state.go('app.pickleJar', {reload: true});
-
+                    setUserData(email)
                 }).catch(function (error) {
 
                 $ionicPopup.alert({
                     title: 'Login Error. Please Try Again',
                     template: error.message
                 });
-
                 $ionicLoading.hide();
             });
 
         };
 
-        function setUserData(email) {
-            users.$loaded().then(function () {
+        function setUserData(email){
+            var users_ref = firebase.database().ref("Users/");
+            var users = $firebaseArray(users_ref);
+
+            users.$loaded().then(function(){
                 angular.forEach(users, function (user) {
                     if (user.email == email) {
-                        $rootScope.email = user.email;
                         $rootScope.org = user.org;
-
-                        if(user.type == "organizer"){
-                            $state.go('organizer');
-                        }else{
-                        }
-
+                        $rootScope.email = user.email;
+                        Storage.setData('id', user.$id);
+                        $ionicLoading.hide();
+                        $state.go('app.pickleJar');
                     }
                 });
-            });
+                $ionicLoading.hide();
+            })
         }
-
 
     })
 
-    .controller('signupCtrl', function ($scope, $state, Auth, $ionicLoading, $stateParams, $firebaseArray) {
+    .controller('signupCtrl', function ($scope, $state, Auth, $ionicLoading, $stateParams, $firebaseArray, $rootScope) {
 
         var orgs_ref = firebase.database().ref("Orgs");
         var orgs = $firebaseArray(orgs_ref);
@@ -89,18 +86,21 @@ angular.module('app.controllers', [])
                         
                         // Add user to Firebase database
                         users.$add({
-                            email: email,
+                            email: email.toLowerCase(),
                             org: m_ValidOrgName,
                             newsletterStatus: m_bNewsletterStatus
                         }).then(function () {
+
+                        $rootScope.org = m_ValidOrgName;
+                        $rootScope.email = email.toLowerCase();
                             
-                            if(m_bNewsletterStatus){
-                                emailSparkPlug(email);
-                            }
-                            
-                            $ionicLoading.hide();
-                            $state.go("app.pickleJar");
-                            
+                        if(m_bNewsletterStatus){
+                            emailSparkPlug(email);
+                        }
+
+                        $ionicLoading.hide();
+                        $state.go("app.pickleJar");
+
                         }).catch(function (err) {
                             alert("Server Communication Error: Please try again.");
                         });
@@ -144,44 +144,66 @@ angular.module('app.controllers', [])
     })
 
     .controller('pickleJarCtrl', function ($scope, $stateParams, $firebaseArray, $state, Auth, $firebaseObject,
-                                           $ionicSideMenuDelegate, $window) {
+                                           $ionicSideMenuDelegate, Storage) {
 
-        var user_auth = Auth.$getAuth();
-        var users_ref = firebase.database().ref("Users/");
-        var users = $firebaseArray(users_ref);
         var current_log = null;
+        var gif = null;
 
         $scope.date = new Date().toDateString();
         $scope.total = 0;
-        $scope.logs = [];
 
-        users.$loaded().then(function () {
-            angular.forEach(users, function (user) {
-                if (user.email == user_auth.email) {
+        var log_ref = firebase.database().ref("Users/" + Storage.getData('id') + "/logs/" + $scope.date);
+        current_log = $firebaseObject(log_ref);
 
-                    $scope.email = user.email;
-                    $scope.org = user.org;
-                    var log_ref = firebase.database().ref("Users/" + user.$id + "/logs/" + $scope.date);
-                    var logs_ref = firebase.database().ref("Users/" + user.$id + "/logs");
-                    var logs = $firebaseArray(logs_ref);
-                    current_log = $firebaseObject(log_ref);
+        current_log.$loaded().then(function () {
+            if (current_log.whine_fine == undefined) {
+                current_log.whine_fine = 0;
+            } else {
+                $scope.total = current_log.whine_fine;
+            }
 
-                    logs.$loaded().then(function () {
-                        $scope.logs = logs;
-                    });
+        })
 
-                    current_log.$loaded().then(function () {
-                        if (current_log.whine_fine == undefined) {
-                            current_log.whine_fine = 0;
-                        } else {
-                            $scope.total = current_log.whine_fine;
-                        }
-
-                    })
-                }
-            });
-
+        $(document).ready(function() {
+            gif = document.getElementById('gif');
         });
+
+        $scope.addWhineFine = function () {
+            current_log.whine_fine += 0.25;
+            current_log.$save();
+            $scope.total = current_log.whine_fine;
+            startGif();
+        }
+
+        $scope.toggleLeft = function () {
+            $ionicSideMenuDelegate.toggleLeft();
+        };
+
+        function startGif(){
+            console.log(gif);
+
+            gif.play();
+            setTimeout(function(){
+                gif.pause();
+            }, 1750)
+        }
+
+    })
+    .controller('sideMenuCtrl', function ($scope, $state, $ionicSideMenuDelegate, $stateParams, $firebaseArray, Storage, $window) {
+
+        var logs_ref = firebase.database().ref("Users/" + Storage.getData('id') + "/logs");
+        var logs = $firebaseArray(logs_ref);
+
+        logs.$loaded().then(function () {
+            $scope.logs = logs;
+        });
+
+        $scope.goToAbout = function () {
+            $ionicSideMenuDelegate.toggleLeft();
+            setTimeout(function () {
+                $state.go('app.about');
+            }, 250);
+        };
 
         $scope.logout = function () {
 
@@ -190,35 +212,16 @@ angular.module('app.controllers', [])
             // Give the side menu some time to close
             setTimeout(function () {
                 firebase.auth().signOut().then(function () {
+                    Storage.clearData('id');
                     $state.go("welcome", {}, {reload: true})
-                    setTimeout(function () {
-                        $window.location.reload(true);
+                    setTimeout(function(){
+                        $window.location.reload();
                     }, 5)
                 })
             }, 250);
         };
-
-        $scope.addWhineFine = function () {
-            current_log.whine_fine += 0.25;
-            current_log.$save();
-            $scope.total = current_log.whine_fine
-        }
-
-        $scope.toggleLeft = function () {
-            $ionicSideMenuDelegate.toggleLeft();
-        };
-
-        $scope.goToAbout = function () {
-            $ionicSideMenuDelegate.toggleLeft();
-            setTimeout(function () {
-                $state.go('app.about');
-            }, 250);
-        }
-
-
     })
 
-    .controller('aboutCtrl', function ($scope, $stateParams) {
-
+    .controller('aboutCtrl', function ($scope, $stateParams, $rootScope) {
 
     });

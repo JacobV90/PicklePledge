@@ -20,6 +20,7 @@ function ($firebaseAuth) {
             return JSON.parse($window.localStorage.getItem(entry));
         },
         clearData: function(entry){
+            console.log($window.localStorage.getItem(entry))
             $window.localStorage.removeItem(entry);
             console.log($window.localStorage.getItem(entry));
             return this
@@ -27,7 +28,7 @@ function ($firebaseAuth) {
     };
 })
 
-.factory("User", function (Auth, $firebaseArray) {
+.factory("User", function (email, id) {
     var user_auth = Auth.$getAuth();
     var users_ref = firebase.database().ref("Users/");
     var users = $firebaseArray(users_ref);

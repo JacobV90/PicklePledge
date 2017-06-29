@@ -33,7 +33,10 @@ angular.module('app.routes', [])
                 url: '/app',
                 abstract: true,
                 templateUrl: 'templates/pickleJar.html',
-                controller: 'pickleJarCtrl'
+                controller: 'sideMenuCtrl',
+                params:{
+                    id: null
+                }
             })
 
             .state('app.pickleJar', {
@@ -49,7 +52,10 @@ angular.module('app.routes', [])
                         return Auth.$requireSignIn();
                     }]
                 },
-                cache: false
+                cache: false,
+                params:{
+                    id: null
+                }
             })
 
             .state('app.about', {
