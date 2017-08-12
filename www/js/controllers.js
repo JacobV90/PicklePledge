@@ -30,6 +30,8 @@ angular.module('app.controllers', [])
                 $ionicLoading.hide();
             });
 
+            $ionicLoading.hide();
+
         };
 
         function setUserData(email){
@@ -144,48 +146,86 @@ angular.module('app.controllers', [])
     })
 
     .controller('pickleJarCtrl', function ($scope, $stateParams, $firebaseArray, $state, Auth, $firebaseObject,
-                                           $ionicSideMenuDelegate, Storage) {
-
-        var current_log = null;
-        var gif = null;
+                                           $ionicSideMenuDelegate, Storage, $document) {
 
         $scope.date = new Date().toDateString();
         $scope.total = 0;
 
-        var log_ref = firebase.database().ref("Users/" + Storage.getData('id') + "/logs/" + $scope.date);
-        current_log = $firebaseObject(log_ref);
+        var current_log = null;
+        var currentLogFound = false;
+        var gif = null;
+        var logCount = 0;
 
-        current_log.$loaded().then(function () {
-            if (current_log.whine_fine == undefined) {
-                current_log.whine_fine = 0;
-            } else {
-                $scope.total = current_log.whine_fine;
-            }
+        var logs_ref = firebase.database().ref("Users/" + Storage.getData('id') + "/logs");
+        logs_ref.on("child_added", function(data){
+            logCount = data.numChildren();
+        });
 
-        })
+        var logs = $firebaseArray(logs_ref);
+        logs.$loaded().then(function (data) {
+            data.forEach(function(log){
+                if(log.date == $scope.date){
+                    var log_ref = firebase.database().ref("Users/" + Storage.getData('id') + "/logs/" + log.$id);
+                    current_log = $firebaseObject(log_ref);
+                    currentLogFound = true;
+                    setupCurrentLog();
+                }
+            });
+        });
 
         $(document).ready(function() {
             gif = document.getElementById('gif');
         });
 
         $scope.addWhineFine = function () {
-            current_log.whine_fine += 0.25;
-            current_log.$save();
-            $scope.total = current_log.whine_fine;
-            startGif();
-        }
+            updateLog();
+        };
 
         $scope.toggleLeft = function () {
             $ionicSideMenuDelegate.toggleLeft();
         };
 
         function startGif(){
-            console.log(gif);
-
             gif.play();
             setTimeout(function(){
                 gif.pause();
             }, 1750)
+        }
+
+        function updateLog(){
+            if(currentLogFound){
+                current_log.whine_fine += 0.25;
+                current_log.$save();
+                $scope.total = current_log.whine_fine;
+            }else{
+                logs.$add({
+                    id: logCount + 1,
+                    whine_fine: 0.25,
+                    date: $scope.date
+                }).then(function(data){
+                    logs.forEach(function(log){
+                        if(log.date == $scope.date){
+                            var log_ref = firebase.database().ref("Users/" + Storage.getData('id') + "/logs/" + log.$id);
+                            current_log = $firebaseObject(log_ref);
+                            currentLogFound = true;
+                            setupCurrentLog();
+                        }
+                    })
+                }).catch(function(err){
+                    console.log(err)
+                })
+
+            }
+            startGif();
+        }
+
+        function setupCurrentLog(){
+            current_log.$loaded().then(function (data) {
+                if (data.whine_fine == undefined) {
+                    current_log.whine_fine = 0;
+                }
+                $scope.total = data.whine_fine;
+            });
         }
 
     })
@@ -197,6 +237,10 @@ angular.module('app.controllers', [])
         logs.$loaded().then(function () {
             $scope.logs = logs;
         });
+
+        logs.sort(compare);
+
+        logs.$watch(function() { logs.sort(compare); });
 
         $scope.goToAbout = function () {
             $ionicSideMenuDelegate.toggleLeft();
@@ -220,6 +264,10 @@ angular.module('app.controllers', [])
                 })
             }, 250);
         };
+
+        function compare(a, b) {
+            return -1 * a.id.toString().localeCompare(b.id.toString());
+        }
     })
 
     .controller('aboutCtrl', function ($scope, $stateParams, $rootScope) {
